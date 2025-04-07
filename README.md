@@ -1,18 +1,22 @@
-# TikTok FYP API
+# TikTok API Scraper
 
-This is a simple Express.js server that fetches TikTok FYP videos using RapidAPI.
+This project allows you to fetch TikTok posts by username using the TikTok API and displays the results with the post links.
 
-## Usage
+## Features
 
-GET `/fyp` - Returns a list of TikTok FYP video URLs.
+- Fetches TikTok posts from a specified username.
+- Retrieves up to 50 posts from the user's feed.
+- Returns the URLs of posts that are not empty.
+- Built with Node.js and Express.
 
-## Deploy
+## Requirements
 
-You can deploy this on Render, Vercel, or Railway.
+- Node.js (v14 or higher recommended)
+- npm (Node Package Manager)
 
-## Setup
+## Installation
 
-1. Clone the repo
-2. Run `npm install`
-3. Add your RapidAPI key in `index.js`
-4. Run `npm start`
+1. Clone this repository to your local machine:
+   ```bash
+   git clone https://github.com/your-username/tiktok-api-scraper.git
+   cd tiktok-api-scraper
