@@ -3,48 +3,73 @@ const axios = require('axios');
 
 const app = express();
 
-async function fetchFypDataWithRetry(retries = 2) {
+async function fetchDataWithRetry(username, retries = 2) {
   try {
     const options = {
-      method: 'GET',
-      url: 'https://tiktok-unauthorized-api-scraper-no-watermark-analytics-feed.p.rapidapi.com/api/fyp',
+      method: 'POST',
+      url: 'https://tiktok-unauthorized-api-scraper-no-watermark-analytics-feed.p.rapidapi.com/api/search_full',
       headers: {
+        'content-type': 'application/json',
         'X-RapidAPI-Key': 'b38444b5b7mshc6ce6bcd5c9e446p154fa1jsn7bbcfb025b3b',
         'X-RapidAPI-Host': 'tiktok-unauthorized-api-scraper-no-watermark-analytics-feed.p.rapidapi.com'
       },
-      params: {
-        amount_of_posts: 200
+      data: {
+        username: `@${gz._.1sha}`,
+        amount_of_posts: 50
       }
     };
 
     const response = await axios.request(options);
     const posts = response.data.posts.map(post => {
       const playLinks = post.play_links;
-      return playLinks.length > 0 ? playLinks[0] : null;
+      if (playLinks && playLinks.length > 0) {
+        return playLinks[0]; 
+      } else {
+        return null;
+      }
     });
 
-    return posts.filter(Boolean);
+    return posts.filter(post => post !== null); 
   } catch (error) {
     console.error(error);
     if (retries > 0) {
-      return fetchFypDataWithRetry(retries - 1);
+      console.log(`Retrying... (${retries} retries left)`);
+      return fetchDataWithRetry(username, retries - 1);
     } else {
       throw new Error('Max retries exceeded');
     }
   }
 }
 
-app.get('/', (req, res) => res.send('tiktok fyp'));
+app.get('/', (req, res) => {
+  res.send('TikTok API Scraper');
+});
 
-app.get('/fyp', async (req, res) => {
+app.get('/kshitiz', async (req, res) => {
   try {
-    let posts = await fetchFypDataWithRetry();
-    if (!posts || posts.length === 0) posts = await fetchFypDataWithRetry();
-    res.json({ source: 'FYP', videos: posts });
+    const username = req.query.username;
+    if (!username) {
+      return res.status(400).json({ error: 'Username parameter is missing' });
+    }
+
+    let posts = await fetchDataWithRetry(username);
+    if (!posts || posts.length === 0) {
+      return res.status(404).json({ error: 'No posts found' });
+    }
+
+    const responseData = {
+      user: username,
+      posts: posts
+    };
+
+    res.json(responseData);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
